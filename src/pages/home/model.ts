@@ -46,6 +46,7 @@ const tubeSelected = tubeClicked
 
 export const $difficulty = createStore<keyof typeof LEVELS>('easy');
 export const $state = createStore<'start' | 'ingame' | 'won'>('start');
+export const $moves = createStore(0);
 const $tubes = createStore<Tube[]>([]);
 const NO_SELECTED = -1;
 const $selectedTubeIndex = createStore(NO_SELECTED);
@@ -150,6 +151,8 @@ $state
   .on(won, () => 'won')
   .on(toMainMenuClicked, () => 'start');
 $tubes.on(gameStarted, (_, count) => generateNewTubes(count));
+
+$moves.reset(gameStarted).on(ballMoved, (count) => count + 1);
 
 $selectedTubeIndex
   .on(ballIsTaken, (_, { clickedIndex }) => clickedIndex)

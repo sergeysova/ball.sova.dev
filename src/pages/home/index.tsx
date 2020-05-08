@@ -6,6 +6,7 @@ import {
   $state,
   $tubesWithSelected,
   $difficulty,
+  $moves,
   BallColor,
   startClicked,
   tubeClicked,
@@ -91,8 +92,8 @@ const Button = styled.button.attrs(buttonMap)`
   color: black;
   padding: 0.6rem 1rem;
   font-size: 1.3rem;
-  border: 2px solid lightgray;
   margin: 0 0.5rem;
+  border: 2px solid lightgray;
   cursor: pointer;
   position: relative;
 
@@ -125,12 +126,26 @@ export const InPlay: React.FC = () => {
       <div>
         <Button onClick={toMainMenuClicked} text="Menu" />
         <Button onClick={restartClicked} text="Restart" />
+        <Moves />
       </div>
       <Container>{tubes}</Container>
       {isWon && <div>You win!</div>}
     </>
   );
 };
+
+const MovesContent: React.FC<{ className?: string }> = ({ className }) => {
+  const count = useStore($moves);
+
+  return <span className={className}>Moves: {count}</span>;
+};
+
+const Moves = styled(MovesContent)`
+  color: black;
+  padding: 0.6rem 1rem;
+  font-size: 1.3rem;
+  margin: 0 0.5rem;
+`;
 
 const Container = styled.div`
   display: flex;
@@ -210,17 +225,17 @@ interface BallProps {
 
 const colors = [
   'blue',
-  'brown',
-  'cyan',
-  'darkgreen',
-  'gray',
-  'lightblue',
-  'lime',
-  'orange',
-  'pink',
-  'purple',
   'red',
   'yellow',
+  'lime',
+  'purple',
+  'orange',
+  'pink',
+  'brown',
+  'lightblue',
+  'gray',
+  'cyan',
+  'darkgreen',
 ];
 
 const ballMap = ({ ball }: BallProps) => ({
