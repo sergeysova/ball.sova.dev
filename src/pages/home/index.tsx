@@ -12,14 +12,13 @@ import {
   difficultyClicked,
 } from './model';
 
+const $isWon = $state.map((state) => state === 'won');
+
 export const HomePage: React.FC = () => {
   const state = useStore($state);
 
   if (state === 'start') {
     return <StartScreen />;
-  }
-  if (state === 'won') {
-    return <div>You win!</div>;
   }
 
   return <InPlay />;
@@ -113,10 +112,18 @@ const Button = styled.button.attrs(buttonMap)`
 `;
 
 export const InPlay: React.FC = () => {
+  const isWon = useStore($isWon);
+
   const tubes = useList($tubesWithSelected, ({ balls, over }, position) => (
     <Tube balls={balls} over={over} position={position} onClick={tubeClicked} />
   ));
-  return <Container>{tubes}</Container>;
+
+  return (
+    <>
+      <Container>{tubes}</Container>
+      {isWon && <div>You win!</div>}
+    </>
+  );
 };
 
 const Container = styled.div`
