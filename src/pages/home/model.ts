@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { MouseEvent } from 'react';
-import { createStore, createEvent, combine } from 'effector';
+import { createStore, createEvent, combine, guard, sample } from 'effector';
 
 interface Tube {
   balls: BallColor[];
 }
+
+const BALLS_IN_TUBE = 4;
 
 export type BallColor =
   | 0x0
@@ -22,20 +24,24 @@ export type BallColor =
 
 export const startClicked = createEvent<MouseEvent<HTMLButtonElement>>();
 export const tubeClicked = createEvent<MouseEvent<HTMLDivElement>>();
+const tubeSelected = tubeClicked
+  .filterMap((event) => event.currentTarget.dataset.position)
+  .map((position) => Number.parseInt(position, 10));
 
 export const $state = createStore<'start' | 'ingame' | 'won'>('start');
 const $tubes = createStore<Tube[]>([]);
-const $selectedTube = createStore(-1);
+const NO_SELECTED = -1;
+const $selectedTubeIndex = createStore(NO_SELECTED);
 
-export const $tubesSelected = combine(
+export const $tubesWithSelected = combine(
   $tubes,
-  $selectedTube,
+  $selectedTubeIndex,
   (tubes, selected) =>
     tubes.map(({ balls }, index) => {
       if (selected === index) {
         return {
           balls: balls.slice(1),
-          over: balls[1],
+          over: balls[0],
         };
       }
       return {
@@ -45,23 +51,111 @@ export const $tubesSelected = combine(
     }),
 );
 
+const $selectedTube = combine(
+  $tubes,
+  $selectedTubeIndex,
+  (tubes, selected) =>
+    tubes.filter((_, index) => selected === index)[0] ?? null,
+);
+
+const $selectedBall = $selectedTube.map(
+  (tube) => (tube ? tube.balls[0] : null) ?? null,
+);
+
+const tubeSelectedWithTubes = sample({
+  source: [$tubes, $selectedTubeIndex, $selectedBall],
+  clock: tubeSelected,
+  fn: ([tubes, selectedIndex, selectedBall], clickedIndex) => ({
+    tubes,
+    // Already selected ball is over the tube
+    selectedIndex,
+    selectedBall,
+
+    // Just clicked
+    clickedIndex,
+    clickedTube: tubes[clickedIndex],
+  }),
+});
+
+const ballMoved = guard({
+  source: tubeSelectedWithTubes,
+  filter({ selectedIndex, clickedIndex, selectedBall, clickedTube }) {
+    if (selectedBall === null) return false;
+    if (selectedIndex === clickedIndex) return false;
+    if (isFull(clickedTube)) return false;
+
+    if (isEmpty(clickedTube)) {
+      return true;
+    }
+    if (isSameColor(clickedTube, selectedBall)) {
+      return true;
+    }
+    return false;
+  },
+});
+
+const ballIsTaken = guard({
+  source: tubeSelectedWithTubes,
+  filter({ selectedBall, clickedTube, clickedIndex, tubes }) {
+    if (selectedBall !== null) return false;
+    if (isEmpty(clickedTube)) return false;
+    return true;
+  },
+});
+
+const ballPutBack = guard({
+  source: tubeSelectedWithTubes,
+  filter: ({ selectedIndex, clickedIndex }) => selectedIndex === clickedIndex,
+});
+
 $state.on(startClicked, () => 'ingame');
 $tubes.on(startClicked, () => generateNewTubes(12));
+
+$selectedTubeIndex
+  .on(ballIsTaken, (_, { clickedIndex }) => clickedIndex)
+  .on(ballPutBack, () => NO_SELECTED)
+  .on(ballMoved, () => NO_SELECTED);
+
+$tubes.on(
+  ballMoved,
+  (_, { tubes, clickedIndex, selectedIndex, selectedBall }) =>
+    tubes.map((tube, index) => {
+      if (index === selectedIndex) {
+        return { balls: tube.balls.slice(1) };
+      }
+      if (index === clickedIndex) {
+        return { balls: [selectedBall!, ...tube.balls] };
+      }
+      return tube;
+    }),
+);
 
 function generateNewTubes(filled: number, empty = 2): Tube[] {
   const series = Array.from(
     { length: filled },
-    (_, index) => new Array(4).fill(index) as BallColor[],
+    (_, index) => new Array(BALLS_IN_TUBE).fill(index) as BallColor[],
   );
   const allBalls = shuffle(([] as BallColor[]).concat(...series));
 
   return Array.from({ length: filled }, () =>
-    Array.from({ length: 4 }, () => allBalls.pop()!),
+    Array.from({ length: BALLS_IN_TUBE }, () => allBalls.pop()!),
   )
-    .concat([[], []])
+    .concat(Array.from({ length: empty }, () => []))
     .map((balls) => ({ balls }));
 }
 
 function shuffle<T>(array: Array<T>): Array<T> {
   return array.sort(() => Math.random() - 0.5);
+}
+
+function isEmpty(tube: Tube): boolean {
+  return tube.balls.length === 0;
+}
+
+function isFull(tube: Tube): boolean {
+  return tube.balls.length === BALLS_IN_TUBE;
+}
+
+function isSameColor(tube: Tube, ball: BallColor): boolean {
+  return tube.balls[0] === ball;
 }

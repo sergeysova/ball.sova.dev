@@ -2,7 +2,13 @@
 import * as React from 'react';
 import { useStore, useList } from 'effector-react';
 import styled, { StyledComponent } from 'styled-components';
-import { BallColor, $state, $tubesSelected, startClicked } from './model';
+import {
+  $state,
+  $tubesWithSelected,
+  BallColor,
+  startClicked,
+  tubeClicked,
+} from './model';
 
 export const HomePage: React.FC = () => {
   const state = useStore($state);
@@ -25,8 +31,8 @@ export const HomePage: React.FC = () => {
 };
 
 export const InPlay: React.FC = () => {
-  const tubes = useList($tubesSelected, ({ balls, over }) => (
-    <Tube balls={balls} over={over} />
+  const tubes = useList($tubesWithSelected, ({ balls, over }, position) => (
+    <Tube balls={balls} over={over} position={position} onClick={tubeClicked} />
   ));
   return <Container>{tubes}</Container>;
 };
@@ -40,10 +46,12 @@ const Container = styled.div`
 type TubeProps = {
   balls: Array<BallColor>;
   over: BallColor | null;
+  position: number;
+  onClick: React.EventHandler<React.MouseEvent<HTMLDivElement>>;
 };
 
-const Tube: React.FC<TubeProps> = ({ balls, over }) => (
-  <TubeHolder>
+const Tube: React.FC<TubeProps> = ({ balls, over, position, onClick }) => (
+  <TubeHolder onClick={onClick} data-position={position}>
     <TubeTop>{over !== null ? <Ball ball={over} /> : null}</TubeTop>
     <TubeGlass>
       {balls.map((color, index) => (
