@@ -5,23 +5,18 @@ import styled, { StyledComponent } from 'styled-components';
 import {
   $state,
   $tubesWithSelected,
+  $difficulty,
   BallColor,
   startClicked,
   tubeClicked,
+  difficultyClicked,
 } from './model';
 
 export const HomePage: React.FC = () => {
   const state = useStore($state);
-  React.useEffect(() => {
-    startClicked(undefined as any);
-  }, []);
 
   if (state === 'start') {
-    return (
-      <button type="button" onClick={startClicked}>
-        Start game
-      </button>
-    );
+    return <StartScreen />;
   }
   if (state === 'won') {
     return <div>You win!</div>;
@@ -29,6 +24,93 @@ export const HomePage: React.FC = () => {
 
   return <InPlay />;
 };
+
+const StartScreen: React.FC = () => {
+  const difficulty = useStore($difficulty);
+
+  return (
+    <Content>
+      <Title>
+        LA<span>BALL</span>ATORY
+      </Title>
+      <fieldset>
+        <legend>Difficulty</legend>
+        <Button
+          selected={difficulty === 'easy'}
+          onClick={() => difficultyClicked('easy')}
+          text="Easy"
+        />
+        <Button
+          selected={difficulty === 'medium'}
+          onClick={() => difficultyClicked('medium')}
+          text="Medium"
+        />
+        <Button
+          selected={difficulty === 'hard'}
+          onClick={() => difficultyClicked('hard')}
+          text="Hard"
+        />
+      </fieldset>
+      <br />
+      <Button onClick={startClicked} text="Start game" />
+    </Content>
+  );
+};
+
+const Content = styled.div`
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+`;
+
+const Title = styled.h2`
+  font-size: 3rem;
+  font-weight: 300;
+
+  & span {
+    text-decoration: underline;
+  }
+`;
+
+interface Button {
+  selected?: boolean;
+  text: React.ReactNode;
+}
+
+const buttonMap = ({ selected, text }: Button) => ({
+  'data-selected': selected ?? false,
+  type: 'button',
+  children: text,
+});
+
+const Button = styled.button.attrs(buttonMap)`
+  background-color: white;
+  color: black;
+  padding: 0.6rem 1rem;
+  font-size: 1.3rem;
+  border: 2px solid lightgray;
+  margin: 0 0.5rem;
+  cursor: pointer;
+  position: relative;
+
+  &:hover {
+    background-color: #f1f1f1;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px lightblue;
+    border-color: lightblue;
+  }
+
+  &[data-selected='true'] {
+    border-color: gray;
+    background-color: gray;
+    color: white;
+  }
+`;
 
 export const InPlay: React.FC = () => {
   const tubes = useList($tubesWithSelected, ({ balls, over }, position) => (

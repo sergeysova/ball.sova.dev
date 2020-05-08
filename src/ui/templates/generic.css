@@ -10,9 +10,10 @@
 }
 
 main {
+  display: flex;
+  flex-flow: column;
   align-items: center;
   color: #444950;
-  display: flex;
   overflow: hidden;
   padding: 4rem 0;
   position: relative;

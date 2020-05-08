@@ -28,6 +28,7 @@ export type BallColor =
   | 0xb;
 
 export const startClicked = createEvent<MouseEvent<HTMLButtonElement>>();
+export const difficultyClicked = createEvent<keyof typeof LEVELS>();
 export const tubeClicked = createEvent<MouseEvent<HTMLDivElement>>();
 const tubeSelected = tubeClicked
   .filterMap((event) => event.currentTarget.dataset.position)
@@ -119,6 +120,8 @@ const ballPutBack = guard({
   source: tubeSelectedWithTubes,
   filter: ({ selectedIndex, clickedIndex }) => selectedIndex === clickedIndex,
 });
+
+$difficulty.on(difficultyClicked, (_, set) => set);
 
 $state.on(gameStarted, () => 'ingame');
 $tubes.on(gameStarted, (_, count) => generateNewTubes(count));
