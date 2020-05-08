@@ -1,0 +1,14 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint/eslint-plugin"],
+  "extends": [
+    "plugin:@typescript-eslint/eslint-plugin/recommended",
+    "plugin:@typescript-eslint/eslint-plugin/eslint-recommended",
+    "@atomix/eslint-config-react",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    "import/extensions": ["error", "ignorePackages"],
+    "@typescript-eslint/no-use-before-define": "off"
+  }
+}
