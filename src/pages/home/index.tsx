@@ -1,26 +1,35 @@
 /* eslint-disable react/no-array-index-key */
 import * as React from 'react';
+import { useStore, useList } from 'effector-react';
 import styled, { StyledComponent } from 'styled-components';
-import { BallColor } from './model';
+import { BallColor, $state, $tubesSelected, startClicked } from './model';
 
-export const HomePage: React.FC = () => (
-  <Container>
-    <Tube balls={[1, 2, 3, 4]} over={null} />
-    <Tube balls={[5, 6, 7, 8]} over={null} />
-    <Tube balls={[9, 10, 11, 0]} over={null} />
-    <Tube balls={[3, 3, 1]} over={null} />
-    <Tube balls={[9, 10, 11, 0]} over={null} />
-    <Tube balls={[3, 3, 1]} over={null} />
-    <Tube balls={[]} over={5} />
-    <Tube balls={[9, 10, 11, 0]} over={null} />
-    <Tube balls={[2, 2, 9]} over={null} />
-    <Tube balls={[6, 6, 1]} over={null} />
-    <Tube balls={[1, 2, 3, 4]} over={null} />
-    <Tube balls={[6, 6, 1]} over={null} />
-    <Tube balls={[]} over={null} />
-    <Tube balls={[]} over={null} />
-  </Container>
-);
+export const HomePage: React.FC = () => {
+  const state = useStore($state);
+  React.useEffect(() => {
+    startClicked(undefined as any);
+  }, []);
+
+  if (state === 'start') {
+    return (
+      <button type="button" onClick={startClicked}>
+        Start game
+      </button>
+    );
+  }
+  if (state === 'won') {
+    return <div>You win!</div>;
+  }
+
+  return <InPlay />;
+};
+
+export const InPlay: React.FC = () => {
+  const tubes = useList($tubesSelected, ({ balls, over }) => (
+    <Tube balls={balls} over={over} />
+  ));
+  return <Container>{tubes}</Container>;
+};
 
 const Container = styled.div`
   display: flex;
