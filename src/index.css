@@ -3,4 +3,36 @@ body {
     Noto Sans, sans-serif, BlinkMacSystemFont, Helvetica, Arial,
     Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
   color: #1c1e21;
+  margin: 0;
+  padding: 0;
+}
+
+@media (orientation: portrait) and (max-height: 840px) {
+  :root {
+    font-size: 13px;
+  }
+}
+
+@media (orientation: portrait) and (max-height: 740px) {
+  :root {
+    font-size: 12px;
+  }
+}
+
+@media (orientation: landscape) and (max-width: 740px) {
+  :root {
+    font-size: 12px;
+  }
+}
+
+@media (orientation: portrait) and (max-height: 645px) {
+  :root {
+    font-size: 11px;
+  }
+}
+
+@media (orientation: portrait) and (max-height: 570px) {
+  :root {
+    font-size: 10px;
+  }
 }

@@ -3,10 +3,10 @@ import './generic.css';
 
 export const GenericTemplate: React.FC = ({ children }) => (
   <>
+    <main>{children}</main>
     <nav className="navigation">
       <a href="https://effector.now.sh">Effector</a>
       <a href="https://github.com/sergeysova/laBALLatory">Source Code</a>
     </nav>
-    <main>{children}</main>
   </>
 );

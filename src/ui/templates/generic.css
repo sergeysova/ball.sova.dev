@@ -1,6 +1,7 @@
 .navigation {
   display: flex;
   flex-flow: row nowrap;
+  justify-content: center;
 }
 
 .navigation a {
@@ -15,7 +16,7 @@ main {
   align-items: center;
   color: #444950;
   overflow: hidden;
-  padding: 4rem 0;
+  padding: 1rem 0;
   position: relative;
   text-align: center;
 }

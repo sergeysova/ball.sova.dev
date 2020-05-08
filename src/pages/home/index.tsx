@@ -209,7 +209,7 @@ const TubeGlass: Styled<Glass> = styled.div.attrs(glassMap)`
   border: 2px solid lightgray;
   border-top: none;
   width: 3rem;
-  height: 9.8rem;
+  height: 10rem;
   padding-bottom: 0.4rem;
   padding-top: 0.4rem;
   border-bottom-left-radius: 2.4rem;
