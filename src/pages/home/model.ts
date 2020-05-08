@@ -48,11 +48,13 @@ export const $tubesWithSelected = combine(
       if (selected === index) {
         return {
           balls: balls.slice(1),
+          complete: false,
           over: balls[0],
         };
       }
       return {
         balls,
+        complete: isFull({ balls }) && balls.every(eachSame),
         over: null,
       };
     }),
@@ -68,6 +70,11 @@ const $selectedTube = combine(
 const $selectedBall = $selectedTube.map(
   (tube) => (tube ? tube.balls[0] : null) ?? null,
 );
+
+const won = guard({
+  source: $tubes,
+  filter: checkWinner,
+});
 
 const gameStarted = sample({
   source: $difficulty,
@@ -123,7 +130,7 @@ const ballPutBack = guard({
 
 $difficulty.on(difficultyClicked, (_, set) => set);
 
-$state.on(gameStarted, () => 'ingame');
+$state.on(gameStarted, () => 'ingame').on(won, () => 'won');
 $tubes.on(gameStarted, (_, count) => generateNewTubes(count));
 
 $selectedTubeIndex
@@ -173,4 +180,22 @@ function isFull(tube: Tube): boolean {
 
 function isSameColor(tube: Tube, ball: BallColor): boolean {
   return tube.balls[0] === ball;
+}
+
+function eachSame(value: BallColor, index: number, list: BallColor[]): boolean {
+  return value === list[0];
+}
+
+function checkWinner(tubes: Tube[]): boolean {
+  for (const tube of tubes) {
+    if (!isEmpty(tube) && !isFull(tube)) {
+      return false;
+    }
+
+    if (!tube.balls.every(eachSame)) {
+      return false;
+    }
+  }
+
+  return true;
 }

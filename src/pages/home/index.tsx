@@ -114,8 +114,8 @@ const Button = styled.button.attrs(buttonMap)`
 export const InPlay: React.FC = () => {
   const isWon = useStore($isWon);
 
-  const tubes = useList($tubesWithSelected, ({ balls, over }, position) => (
-    <Tube balls={balls} over={over} position={position} onClick={tubeClicked} />
+  const tubes = useList($tubesWithSelected, (tube, position) => (
+    <Tube tube={tube} position={position} onClick={tubeClicked} />
   ));
 
   return (
@@ -133,17 +133,20 @@ const Container = styled.div`
 `;
 
 type TubeProps = {
-  balls: Array<BallColor>;
-  over: BallColor | null;
+  tube: {
+    balls: Array<BallColor>;
+    over: BallColor | null;
+    complete: boolean;
+  };
   position: number;
   onClick: React.EventHandler<React.MouseEvent<HTMLDivElement>>;
 };
 
-const Tube: React.FC<TubeProps> = ({ balls, over, position, onClick }) => (
+const Tube: React.FC<TubeProps> = ({ tube, position, onClick }) => (
   <TubeHolder onClick={onClick} data-position={position}>
-    <TubeTop>{over !== null ? <Ball ball={over} /> : null}</TubeTop>
-    <TubeGlass>
-      {balls.map((color, index) => (
+    <TubeTop>{tube.over !== null ? <Ball ball={tube.over} /> : null}</TubeTop>
+    <TubeGlass complete={tube.complete}>
+      {tube.balls.map((color, index) => (
         <Ball key={index} ball={color} />
       ))}
     </TubeGlass>
@@ -165,7 +168,17 @@ const TubeTop = styled.div`
   border-bottom: 4px solid lightgray;
 `;
 
-const TubeGlass = styled.div`
+type Styled<T extends object> = StyledComponent<'div', T, T>;
+
+interface Glass {
+  complete: boolean;
+}
+
+const glassMap = ({ complete }: Glass) => ({
+  'data-complete': complete,
+});
+
+const TubeGlass: Styled<Glass> = styled.div.attrs(glassMap)`
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -179,6 +192,10 @@ const TubeGlass = styled.div`
   padding-top: 0.4rem;
   border-bottom-left-radius: 2.4rem;
   border-bottom-right-radius: 2.4rem;
+
+  &[data-complete='true'] {
+    background-color: lightgray;
+  }
 `;
 
 interface BallProps {
@@ -204,9 +221,7 @@ const ballMap = ({ ball }: BallProps) => ({
   style: { '--ball-color': colors[ball] },
 });
 
-const Ball: StyledComponent<'div', BallProps, BallProps> = styled.div.attrs(
-  ballMap,
-)`
+const Ball: Styled<BallProps> = styled.div.attrs(ballMap)`
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
