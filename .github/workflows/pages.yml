@@ -17,6 +17,7 @@ jobs:
 
       - run: yarn install --frozen-lockfile
       - run: yarn build
+      - run: cp ./CNAME ./build/CNAME
 
       - name: Deploy to Pages
         uses: JamesIves/github-pages-deploy-action@releases/v3
