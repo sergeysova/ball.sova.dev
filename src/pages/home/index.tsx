@@ -9,7 +9,9 @@ import {
   BallColor,
   startClicked,
   tubeClicked,
+  restartClicked,
   difficultyClicked,
+  toMainMenuClicked,
 } from './model';
 
 const $isWon = $state.map((state) => state === 'won');
@@ -120,6 +122,10 @@ export const InPlay: React.FC = () => {
 
   return (
     <>
+      <div>
+        <Button onClick={toMainMenuClicked} text="Menu" />
+        <Button onClick={restartClicked} text="Restart" />
+      </div>
       <Container>{tubes}</Container>
       {isWon && <div>You win!</div>}
     </>

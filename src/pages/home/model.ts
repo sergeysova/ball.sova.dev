@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { MouseEvent } from 'react';
-import { createStore, createEvent, combine, guard, sample } from 'effector';
+import {
+  createStore,
+  createEvent,
+  combine,
+  guard,
+  sample,
+  forward,
+} from 'effector';
 
 interface Tube {
   balls: BallColor[];
@@ -28,7 +35,10 @@ export type BallColor =
   | 0xb;
 
 export const startClicked = createEvent<MouseEvent<HTMLButtonElement>>();
+export const restartClicked = createEvent<MouseEvent<HTMLButtonElement>>();
+export const toMainMenuClicked = createEvent<MouseEvent<HTMLButtonElement>>();
 export const difficultyClicked = createEvent<keyof typeof LEVELS>();
+
 export const tubeClicked = createEvent<MouseEvent<HTMLDivElement>>();
 const tubeSelected = tubeClicked
   .filterMap((event) => event.currentTarget.dataset.position)
@@ -74,6 +84,11 @@ const $selectedBall = $selectedTube.map(
 const won = guard({
   source: $tubes,
   filter: checkWinner,
+});
+
+forward({
+  from: restartClicked,
+  to: startClicked,
 });
 
 const gameStarted = sample({
@@ -130,13 +145,15 @@ const ballPutBack = guard({
 
 $difficulty.on(difficultyClicked, (_, set) => set);
 
-$state.on(gameStarted, () => 'ingame').on(won, () => 'won');
+$state
+  .on(gameStarted, () => 'ingame')
+  .on(won, () => 'won')
+  .on(toMainMenuClicked, () => 'start');
 $tubes.on(gameStarted, (_, count) => generateNewTubes(count));
 
 $selectedTubeIndex
   .on(ballIsTaken, (_, { clickedIndex }) => clickedIndex)
-  .on(ballPutBack, () => NO_SELECTED)
-  .on(ballMoved, () => NO_SELECTED);
+  .reset(ballPutBack, ballMoved, gameStarted);
 
 $tubes.on(
   ballMoved,
