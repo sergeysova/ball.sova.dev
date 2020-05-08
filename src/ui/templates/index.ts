@@ -1,1 +1,1 @@
-export { GenericTemplate } from "./generic";
+export { GenericTemplate } from './generic';
