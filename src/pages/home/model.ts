@@ -7,6 +7,11 @@ interface Tube {
 }
 
 const BALLS_IN_TUBE = 4;
+export const LEVELS = {
+  easy: 5,
+  medium: 8,
+  hard: 12,
+};
 
 export type BallColor =
   | 0x0
@@ -28,6 +33,7 @@ const tubeSelected = tubeClicked
   .filterMap((event) => event.currentTarget.dataset.position)
   .map((position) => Number.parseInt(position, 10));
 
+export const $difficulty = createStore<keyof typeof LEVELS>('easy');
 export const $state = createStore<'start' | 'ingame' | 'won'>('start');
 const $tubes = createStore<Tube[]>([]);
 const NO_SELECTED = -1;
@@ -61,6 +67,12 @@ const $selectedTube = combine(
 const $selectedBall = $selectedTube.map(
   (tube) => (tube ? tube.balls[0] : null) ?? null,
 );
+
+const gameStarted = sample({
+  source: $difficulty,
+  clock: startClicked,
+  fn: (diff) => LEVELS[diff],
+});
 
 const tubeSelectedWithTubes = sample({
   source: [$tubes, $selectedTubeIndex, $selectedBall],
@@ -108,8 +120,8 @@ const ballPutBack = guard({
   filter: ({ selectedIndex, clickedIndex }) => selectedIndex === clickedIndex,
 });
 
-$state.on(startClicked, () => 'ingame');
-$tubes.on(startClicked, () => generateNewTubes(12));
+$state.on(gameStarted, () => 'ingame');
+$tubes.on(gameStarted, (_, count) => generateNewTubes(count));
 
 $selectedTubeIndex
   .on(ballIsTaken, (_, { clickedIndex }) => clickedIndex)
