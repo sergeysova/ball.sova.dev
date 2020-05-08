@@ -151,6 +151,7 @@ const Container = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  max-width: 38rem;
 `;
 
 type TubeProps = {
