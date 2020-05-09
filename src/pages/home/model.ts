@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { MouseEvent } from 'react';
 import {
-  createStore,
-  createEvent,
   combine,
+  createEvent,
+  createStore,
+  forward,
   guard,
   sample,
-  forward,
 } from 'effector';
 
-interface Tube {
+export interface Tube {
   balls: BallColor[];
 }
+
+const NO_SELECTED = -1;
 
 const BALLS_IN_TUBE = 4;
 export const LEVELS = {
@@ -47,8 +49,7 @@ const tubeSelected = tubeClicked
 export const $difficulty = createStore<keyof typeof LEVELS>('easy');
 export const $state = createStore<'start' | 'ingame' | 'won'>('start');
 export const $moves = createStore(0);
-const $tubes = createStore<Tube[]>([]);
-const NO_SELECTED = -1;
+export const $tubes = createStore<Tube[]>([]);
 const $selectedTubeIndex = createStore(NO_SELECTED);
 
 export const $tubesWithSelected = combine(
@@ -92,7 +93,7 @@ forward({
   to: startClicked,
 });
 
-const gameStarted = sample({
+export const gameStarted = sample({
   source: $difficulty,
   clock: startClicked,
   fn: (diff) => LEVELS[diff],
@@ -113,7 +114,7 @@ const tubeSelectedWithTubes = sample({
   }),
 });
 
-const ballMoved = guard({
+export const ballMoved = guard({
   source: tubeSelectedWithTubes,
   filter({ selectedIndex, clickedIndex, selectedBall, clickedTube }) {
     if (selectedBall === null) return false;
@@ -132,7 +133,7 @@ const ballMoved = guard({
 
 const ballIsTaken = guard({
   source: tubeSelectedWithTubes,
-  filter({ selectedBall, clickedTube, clickedIndex, tubes }) {
+  filter({ selectedBall, clickedTube }) {
     if (selectedBall !== null) return false;
     if (isEmpty(clickedTube)) return false;
     return true;

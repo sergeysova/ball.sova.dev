@@ -3,17 +3,18 @@ import * as React from 'react';
 import { useStore, useList } from 'effector-react';
 import styled, { StyledComponent } from 'styled-components';
 import {
-  $state,
-  $tubesWithSelected,
   $difficulty,
   $moves,
+  $state,
+  $tubesWithSelected,
   BallColor,
-  startClicked,
-  tubeClicked,
-  restartClicked,
   difficultyClicked,
+  restartClicked,
+  startClicked,
   toMainMenuClicked,
+  tubeClicked,
 } from './model';
+import { $undoCount, undoClicked, redoClicked } from './history';
 
 const $isWon = $state.map((state) => state === 'won');
 
@@ -92,7 +93,7 @@ const Button = styled.button.attrs(buttonMap)`
   color: black;
   padding: 0.6rem 1rem;
   font-size: 1.3rem;
-  margin: 0 0.5rem;
+  margin: 0 0.2rem;
   border: 2px solid lightgray;
   cursor: pointer;
   position: relative;
@@ -124,13 +125,37 @@ export const InPlay: React.FC = () => {
   return (
     <>
       <div>
-        <Button onClick={toMainMenuClicked} text="Menu" />
+        <Button onClick={toMainMenuClicked} text="←" />
         <Button onClick={restartClicked} text="Restart" />
         <Moves />
+        <UndoButton />
+        <Button
+          onClick={redoClicked}
+          text={
+            <>
+              <sup>5</sup>↪
+            </>
+          }
+        />
       </div>
       <Container>{tubes}</Container>
       {isWon && <div>You win!</div>}
     </>
+  );
+};
+
+const UndoButton = () => {
+  const count = useStore($undoCount);
+
+  return (
+    <Button
+      onClick={undoClicked}
+      text={
+        <>
+          ↩<sup>{count}</sup>
+        </>
+      }
+    />
   );
 };
 
@@ -142,9 +167,9 @@ const MovesContent: React.FC<{ className?: string }> = ({ className }) => {
 
 const Moves = styled(MovesContent)`
   color: black;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 0.4rem;
   font-size: 1.3rem;
-  margin: 0 0.5rem;
+  margin: 0;
 `;
 
 const Container = styled.div`
