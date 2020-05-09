@@ -14,7 +14,7 @@ import {
   toMainMenuClicked,
   tubeClicked,
 } from './model';
-import { $undoCount, undoClicked, redoClicked } from './history';
+import { $undoCount, $redoCount, undoClicked, redoClicked } from './history';
 
 const $isWon = $state.map((state) => state === 'won');
 
@@ -129,14 +129,7 @@ export const InPlay: React.FC = () => {
         <Button onClick={restartClicked} text="Restart" />
         <Moves />
         <UndoButton />
-        <Button
-          onClick={redoClicked}
-          text={
-            <>
-              <sup>5</sup>↪
-            </>
-          }
-        />
+        <RedoButton />
       </div>
       <Container>{tubes}</Container>
       {isWon && <div>You win!</div>}
@@ -153,6 +146,21 @@ const UndoButton = () => {
       text={
         <>
           ↩<sup>{count}</sup>
+        </>
+      }
+    />
+  );
+};
+
+const RedoButton = () => {
+  const count = useStore($redoCount);
+
+  return (
+    <Button
+      onClick={redoClicked}
+      text={
+        <>
+          <sup>{count}</sup>↪
         </>
       }
     />
