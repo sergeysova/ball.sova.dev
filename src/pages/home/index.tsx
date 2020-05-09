@@ -132,8 +132,21 @@ export const InPlay: React.FC = () => {
         <RedoButton />
       </div>
       <Container>{tubes}</Container>
-      {isWon && <div>You win!</div>}
+      {isWon && <WonScreen />}
     </>
+  );
+};
+
+const WonScreen = () => {
+  const moves = useStore($moves);
+
+  return (
+    <Won>
+      <h2>You won!</h2>
+      <Button onClick={restartClicked} text="New game" />
+      <Button onClick={toMainMenuClicked} text="Menu" />
+      <h3>In {moves} moves</h3>
+    </Won>
   );
 };
 
@@ -185,6 +198,24 @@ const Container = styled.div`
   flex-wrap: wrap;
   justify-content: center;
   max-width: 38rem;
+`;
+
+const Won = styled.div`
+  display: flex;
+  flex-flow: column;
+  position: fixed;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(6px);
+  align-items: center;
+  padding-top: 5rem;
+
+  & > * + * {
+    margin-top: 1rem;
+  }
 `;
 
 type TubeProps = {
