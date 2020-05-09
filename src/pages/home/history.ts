@@ -22,7 +22,10 @@ export const $redoCount = combine(
 sample({ source: $tubes, clock: gameStarted, target: historyWrote });
 sample({ source: $tubes, clock: ballMoved, target: historyWrote });
 
+$history.reset(gameStarted);
+
 $currentPosition
+  .reset(gameStarted)
   .on(historyWrote, (position) => position + 1)
   .on(historyForward, (_, [position]) => position)
   .on(undoClicked, (position) => (position <= 1 ? 0 : position - 1));
